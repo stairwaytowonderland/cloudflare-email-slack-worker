@@ -108,7 +108,6 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
 
   // Send to Slack
   await fetch(webhookUrl, {
-    // body: `Got a marketing email from ${message.from}, subject: ${message.headers.get('subject')}`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(slackPayload)
