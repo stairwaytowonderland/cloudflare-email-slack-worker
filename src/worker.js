@@ -29,6 +29,7 @@ export default {
 		const attachments = filterAttachments(content.attachments || []);
 
 		// Prepare list of emails to forward to
+		const recipientEmail = message.to.trim();
 		const workerEmail = env.WORKER_EMAIL.trim();
 		const forwardEmails = filterEmails(
 			env,
@@ -41,11 +42,11 @@ export default {
 		await forwardEmail(message, env, forwardEmails);
 
 		// Process based on recipient address
-		switch (message.to) {
-			case workerEmail:
+		switch (recipientEmail.toLowerCase()) {
+			case workerEmail.toLowerCase():
 				if (env.DEBUG === true) {
 					console.debug("Processing incoming email", {
-						to: message.to,
+						to: recipientEmail,
 						from: message.from,
 						timestamp: Date.now()
 					});
@@ -54,7 +55,7 @@ export default {
 				break;
 
 			default:
-				console.error("Unknown recipient address:", message.to);
+				console.error("Unknown recipient address:", recipientEmail);
 				message.setReject("Unknown address");
 				return new Response("Email not processed", { status: 400 });
 		}

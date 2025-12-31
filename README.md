@@ -34,7 +34,7 @@ A Cloudflare Email Worker that receives incoming emails, parses them, and sends 
 ### Secrets (Required)
 
 - **`SLACK_WEBHOOK_URL`**: Slack incoming webhook URL for sending notifications
-- **`WORKER_EMAIL`**: Email address that routes incoming emails to Slack
+- **`WORKER_EMAIL`**: Expected recipient email for the worker (somewhat redundant, but could be used for additional checks)
 
 ### Secrets (Optional)
 
