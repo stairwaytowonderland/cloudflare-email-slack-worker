@@ -68,6 +68,7 @@ function parseContent(text, html) {
 }
 
 async function sendToSlack(webhookUrl, from, subject, body, attachments) {
+	let hasAttachments = attachments && attachments.length > 0;
   const slackPayload = {
     blocks: [
       {
@@ -99,7 +100,7 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
       {
         type: "divider"
       },
-      ...(attachments.length > 0 ? [{
+      ...(hasAttachments ? [{
         type: "section",
         text: {
           type: "mrkdwn",
@@ -109,7 +110,7 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
     ],
     // Legacy attachments field for additional optional info
     // https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
-    ...(attachments.length > 0 ? {attachments: attachments.map(att => ({
+    ...(hasAttachments ? {attachments: attachments.map(att => ({
       color: "#36a64f",
       // blocks: [
       //   {
