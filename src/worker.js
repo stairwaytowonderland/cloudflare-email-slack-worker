@@ -71,42 +71,42 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
   let hasAttachments = attachments && attachments.length > 0;
   const slackPayload = {
     blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: "New Email Received!"
+		{
+			type: "header",
+			text: {
+				type: "plain_text",
+				text: "New Email Received!"
+			}
+		},
+		{
+			type: "section",
+			text: {
+				type: "mrkdwn",
+				// text: `*_From:_* \`${from}\`\n*_Subject:_* \`${subject}\``,
+				text: `*_From:_* ${from}\n*_Subject:_* ${subject}`,
+			}
+		},
+		{
+			type: "divider"
+		},
+		{
+			type: "section",
+			text: {
+				type: "mrkdwn",
+				// text: `*_Body:_*\n\`\`\`${body}\`\`\``
+				text: `${body}`
+			}
+		},
+		{
+			type: "divider"
+		},
+		...(hasAttachments ? [{
+		type: "section",
+		text: {
+			type: "mrkdwn",
+			text: `*_Attachments:_* ${attachments.length} file(s) received.`
 		}
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          // text: `*_From:_* \`${from}\`\n*_Subject:_* \`${subject}\``,
-          text: `*_From:_* ${from}\n*_Subject:_* ${subject}`,
-        }
-      },
-      {
-        type: "divider"
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          // text: `*_Body:_*\n\`\`\`${body}\`\`\``
-          text: `${body}`
-        }
-      },
-      {
-        type: "divider"
-      },
-      ...(hasAttachments ? [{
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*_Attachments:_* ${attachments.length} file(s) received.`
-        }
-      }] : [])
+		}] : [])
     ],
     // Legacy attachments field for additional optional info
     // https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
