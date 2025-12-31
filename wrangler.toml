@@ -4,6 +4,9 @@ name = "damp-tooth-c648"
 main = "src/worker.js"
 compatibility_date = "2025-12-30"
 
+workers_dev = true
+preview_urls = false
+
 # [vars]
 # KEY = "value"
 
