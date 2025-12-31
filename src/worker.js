@@ -10,61 +10,61 @@ export default {
 				method: request.method,
 				timestamp: Date.now()
 			});
-    }
-    return new Response('Email worker is running', { status: 200 });
-  },
+		}
+		return new Response('Email worker is running', { status: 200 });
+	},
 
-  async email(message, env, ctx) {
-    const webhookUrl = env.SLACK_WEBHOOK_URL;
+	async email(message, env, ctx) {
+		const webhookUrl = env.SLACK_WEBHOOK_URL;
 
-    const subject = message.headers.get('subject');
-    const content = await PostalMime.parse(message.raw, {
-      attachmentEncoding: "base64",
-    });
+		const subject = message.headers.get('subject');
+		const content = await PostalMime.parse(message.raw, {
+			attachmentEncoding: "base64",
+		});
 
-    let body = parseContent(content.text, content.html);
+		let body = parseContent(content.text, content.html);
 
-    let attachments = content.attachments.map((attachment) => ({
-      filename: attachment.filename || "unnamed_attachment",
-      mimeType: attachment.mimeType || "application/octet-stream",
-      content: attachment.content, // Already a base64 string due to attachmentEncoding
-    }));
+		let attachments = content.attachments.map((attachment) => ({
+			filename: attachment.filename || "unnamed_attachment",
+			mimeType: attachment.mimeType || "application/octet-stream",
+			content: attachment.content, // Already a base64 string due to attachmentEncoding
+		}));
 
-    switch (message.to) {
-      case env.SLACK_EMAIL:
-				if (env.DEBUG === true) {
-					console.debug("Processing incoming email", {
-						to: message.to,
-						from: message.from,
-						timestamp: Date.now()
-					});
-				}
-        await sendToSlack(webhookUrl, message.from, subject, body, attachments);
-        break;
+		switch (message.to) {
+			case env.SLACK_EMAIL:
+			if (env.DEBUG === true) {
+				console.debug("Processing incoming email", {
+					to: message.to,
+					from: message.from,
+					timestamp: Date.now()
+				});
+			}
+			await sendToSlack(webhookUrl, message.from, subject, body, attachments);
+			break;
 
-      default:
-				console.error("Unknown recipient address:", message.to);
-        message.setReject("Unknown address");
-        return new Response('Email not processed', { status: 400 });
-    }
+			default:
+			console.error("Unknown recipient address:", message.to);
+			message.setReject("Unknown address");
+			return new Response('Email not processed', { status: 400 });
+		}
 
-    await message.forward(env.FORWARD_EMAIL);
-    return new Response('Email processed', { status: 200 });
-  }
+		await message.forward(env.FORWARD_EMAIL);
+		return new Response('Email processed', { status: 200 });
+	}
 }
 
 function parseContent(text, html) {
-  // Extract body (prefer plain text, fallback to HTML conversion)
-  let body = text;
-  if (!body && html) {
-    body = convert(html);
-  }
+	// Extract body (prefer plain text, fallback to HTML conversion)
+	let body = text;
+	if (!body && html) {
+		body = convert(html);
+	}
 
-  if (!body) {
-    return null;
-  }
+	if (!body) {
+		return null;
+	}
 
-  return body.trim();
+	return body.trim();
 }
 
 async function sendToSlack(webhookUrl, from, subject, body, attachments) {
@@ -76,7 +76,7 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
         text: {
           type: "plain_text",
           text: "New Email Received!"
-          }
+		}
       },
       {
         type: "section",
@@ -127,10 +127,10 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
     })) } : {})
   };
 
-  // Send to Slack
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(slackPayload)
-  });
+	// Send to Slack
+	await fetch(webhookUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(slackPayload)
+	});
 }
