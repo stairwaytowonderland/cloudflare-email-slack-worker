@@ -20,7 +20,7 @@ A Cloudflare Email Worker that receives incoming emails, parses them, and sends 
 2. Configure secrets using Wrangler:
    ```bash
    npx wrangler secret put SLACK_WEBHOOK_URL
-   npx wrangler secret put SLACK_EMAIL
+   npx wrangler secret put WORKER_EMAIL
    npx wrangler secret put FORWARD_EMAIL
    ```
 
