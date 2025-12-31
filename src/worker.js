@@ -68,7 +68,7 @@ function parseContent(text, html) {
 }
 
 async function sendToSlack(webhookUrl, from, subject, body, attachments) {
-	let hasAttachments = attachments && attachments.length > 0;
+  let hasAttachments = attachments && attachments.length > 0;
   const slackPayload = {
     blocks: [
       {
