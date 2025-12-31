@@ -8,8 +8,12 @@ workers_dev = true
 preview_urls = false
 
 [vars]
-DEBUG = false
+# DEBUG = true
+FORWARD_EXCLUDE_SENDER = true
+SHOW_ATTACHMENTS = true
+# SHOW_RAW_BODY = true
 
+# Store secrets in .env file and set them using the command below:
 # npx wrangler secret put <SECRET_KEY>
 
 [observability]
