@@ -55,10 +55,10 @@ A Cloudflare Email Worker that receives incoming emails, parses them, and sends 
 
 ### Official Documentation
 
-- [**_Cloudflare_ Email Workers**](https://developers.cloudflare.com/email-routing/email-workers/)
-- [**_Slack_ Block Kit**](https://docs.slack.dev/block-kit/)
-- [**_Slack_ Message Attachments (Legacy)**](https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments)
+- [**_Cloudflare_** Email Workers](https://developers.cloudflare.com/email-routing/email-workers/)
+- [**_Slack_** Block Kit](https://docs.slack.dev/block-kit/)
+- [**_Slack_** Message Attachments (Legacy)](https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments)
 
 ### Other References
 
-- [How to parse emails with Cloudflare Email Workers](https://blog.emailengine.app/how-to-parse-emails-with-cloudflare-email-workers/)
+- [How to parse emails with **_Cloudflare_** Email Workers](https://blog.emailengine.app/how-to-parse-emails-with-cloudflare-email-workers/)
