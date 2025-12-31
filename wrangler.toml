@@ -11,6 +11,7 @@ preview_urls = false
 # DEBUG = true
 FORWARD_EXCLUDE_SENDER = true
 SHOW_ATTACHMENTS = true
+ATTACHMENT_BLOCK_COLOR_HEX = "#36a64f"
 # SHOW_RAW_BODY = true
 
 # Store secrets in .env file and set them using the command below:

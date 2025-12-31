@@ -147,6 +147,7 @@ async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
 	const hasAttachments = attachmentInfoBlocks.length > 0;
 	const showAttachments = env.SHOW_ATTACHMENTS === true;
 	const showRawBody = env.SHOW_RAW_BODY === true;
+	const attachmentBlockColor = env.ATTACHMENT_BLOCK_COLOR_HEX;
 
 	// https://docs.slack.dev/block-kit/
 	const slackPayload = {
@@ -234,7 +235,7 @@ async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
 		// Legacy attachments field for additional optional info
 		// https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
 		...(hasAttachments && showAttachments ? {attachments: attachments.map(att => ({
-			color: "#36a64f",
+			...(attachmentBlockColor ? {color: attachmentBlockColor} : {}),
 			blocks: [
 				{
 					type: "section",

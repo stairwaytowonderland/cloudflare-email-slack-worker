@@ -47,6 +47,7 @@ A Cloudflare Email Worker that receives incoming emails, parses them, and sends 
 
 - **`DEBUG`**: Enable debug logging (`true`/`false`, default: `false`)
 - **`SHOW_ATTACHMENTS`**: Display detailed attachment information in Slack (`true`/`false`, default: `false`)
+- **`ATTACHMENT_BLOCK_COLOR_HEX`**: Override the hex color for the slack attachment blocks (default: `#36a64f`).
 - **`SHOW_RAW_BODY`**: Show raw HTML body instead of converted text (`true`/`false`, default: `false`)
 - **`FORWARD_EXCLUDE_SENDER`**: Prevent forwarding emails back to the original sender (`true`/`false`, default: `false`)
 
