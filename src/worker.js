@@ -2,6 +2,11 @@ import PostalMime from "postal-mime";
 import { convert } from "html-to-text";
 
 export default {
+	// Avoid fetch handler errors
+	async fetch(request, env, ctx) {
+    return new Response('Email worker is running', { status: 200 });
+  },
+
   async email(message, env, ctx) {
     const webhookUrl = env.SLACK_WEBHOOK_URL;
 
