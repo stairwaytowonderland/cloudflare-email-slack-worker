@@ -48,70 +48,69 @@ function parseContent(text, html) {
 }
 
 async function sendToSlack(webhookUrl, from, subject, body, attachments) {
-    // Format for Slack
-		const slackPayload = {
-			blocks: [
-				{
-					type: "header",
-					text: {
-						type: "plain_text",
-						text: "New Email Received!"
-						}
-				},
-				{
-					type: "section",
-					text: {
-						type: "mrkdwn",
-						// text: `*_From:_* \`${from}\`\n*_Subject:_* \`${subject}\``,
-						text: `*_From:_* ${from}\n*_Subject:_* ${subject}`,
+	const slackPayload = {
+		blocks: [
+			{
+				type: "header",
+				text: {
+					type: "plain_text",
+					text: "New Email Received!"
 					}
-				},
-				{
-					type: "divider"
-				},
-				{
-					type: "section",
-					text: {
-						type: "mrkdwn",
-						// text: `*_Body:_*\n\`\`\`${body}\`\`\``
-						text: `${body}`
-					}
-				},
-				{
-					type: "divider"
-				},
-				...(attachments.length > 0 ? [{
-					type: "section",
-					text: {
-						type: "mrkdwn",
-						text: `*_Attachments:_* ${attachments.length} file(s) received.`
-					}
-				}] : [])
-			],
-			// Legacy attachments field for additional optional info
-			// https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
-			...(attachments.length > 0 ? {attachments: attachments.map(att => ({
-				color: "#36a64f",
-				// blocks: [
-				// 	{
-				// 		type: "section",
-				// 		text: {
-				// 			type: "mrkdwn",
-				// 			text: `*${att.filename}* \n*_Mime Type:_* \`${att.mimeType}\` \n*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
-				// 		}
-				// 	}
-				// ]
-				title: att.filename,
-				text: `*_Mime Type:_* \`${att.mimeType}\``,
-				footer: `*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
-			})) } : {})
-		};
+			},
+			{
+				type: "section",
+				text: {
+					type: "mrkdwn",
+					// text: `*_From:_* \`${from}\`\n*_Subject:_* \`${subject}\``,
+					text: `*_From:_* ${from}\n*_Subject:_* ${subject}`,
+				}
+			},
+			{
+				type: "divider"
+			},
+			{
+				type: "section",
+				text: {
+					type: "mrkdwn",
+					// text: `*_Body:_*\n\`\`\`${body}\`\`\``
+					text: `${body}`
+				}
+			},
+			{
+				type: "divider"
+			},
+			...(attachments.length > 0 ? [{
+				type: "section",
+				text: {
+					type: "mrkdwn",
+					text: `*_Attachments:_* ${attachments.length} file(s) received.`
+				}
+			}] : [])
+		],
+		// Legacy attachments field for additional optional info
+		// https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
+		...(attachments.length > 0 ? {attachments: attachments.map(att => ({
+			color: "#36a64f",
+			// blocks: [
+			// 	{
+			// 		type: "section",
+			// 		text: {
+			// 			type: "mrkdwn",
+			// 			text: `*${att.filename}* \n*_Mime Type:_* \`${att.mimeType}\` \n*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
+			// 		}
+			// 	}
+			// ]
+			title: att.filename,
+			text: `*_Mime Type:_* \`${att.mimeType}\``,
+			footer: `*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
+		})) } : {})
+	};
 
-		// Send to Slack
-		await fetch(webhookUrl, {
-			// body: `Got a marketing email from ${message.from}, subject: ${message.headers.get('subject')}`,
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(slackPayload)
-		});
+	// Send to Slack
+	await fetch(webhookUrl, {
+		// body: `Got a marketing email from ${message.from}, subject: ${message.headers.get('subject')}`,
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(slackPayload)
+	});
 }
