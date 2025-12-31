@@ -111,19 +111,19 @@ async function sendToSlack(webhookUrl, from, subject, body, attachments) {
     // Legacy attachments field for additional optional info
     // https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments
     ...(hasAttachments ? {attachments: attachments.map(att => ({
-      color: "#36a64f",
-      // blocks: [
-      //   {
-      //     type: "section",
-      //     text: {
-      //       type: "mrkdwn",
-      //       text: `*${att.filename}* \n*_Mime Type:_* \`${att.mimeType}\` \n*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
-      //     }
-      //   }
-      // ]
-      title: att.filename,
-      text: `*_Mime Type:_* \`${att.mimeType}\``,
-      footer: `*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
+		color: "#36a64f",
+		// blocks: [
+		// 	{
+		// 	type: "section",
+		// 	text: {
+		// 		type: "mrkdwn",
+		// 		text: `*${att.filename}* \n*_Mime Type:_* \`${att.mimeType}\` \n*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
+		// 	}
+		// 	}
+		// ],
+		title: att.filename,
+		text: `*_Mime Type:_* \`${att.mimeType}\``,
+		footer: `*_Size:_* ${Math.round(att.content.length * 0.75)} bytes`
     })) } : {})
   };
 
