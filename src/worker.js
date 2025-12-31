@@ -4,6 +4,13 @@ import { convert } from "html-to-text";
 export default {
 	// Avoid fetch handler errors
 	async fetch(request, env, ctx) {
+		if (env.DEBUG === true) {
+			console.debug("Email worker received a request", {
+				url: request.url,
+				method: request.method,
+				timestamp: Date.now()
+			});
+    }
     return new Response('Email worker is running', { status: 200 });
   },
 
@@ -25,10 +32,18 @@ export default {
 
     switch (message.to) {
       case env.SLACK_EMAIL:
+				if (env.DEBUG === true) {
+					console.debug("Processing incoming email", {
+						to: message.to,
+						from: message.from,
+						timestamp: Date.now()
+					});
+				}
         await sendToSlack(webhookUrl, message.from, subject, body, attachments);
         break;
 
       default:
+				console.error("Unknown recipient address:", message.to);
         message.setReject("Unknown address");
         return new Response('Email not processed', { status: 400 });
     }
