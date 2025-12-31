@@ -1,0 +1,17 @@
+{
+	"name": "damp-tooth-c648",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev"
+	},
+	"devDependencies": {
+		"wrangler": "^4.54.0"
+	},
+	"dependencies": {
+		"html-to-text": "^9.0.5",
+		"postal-mime": "^2.7.1"
+	}
+}

@@ -1,0 +1,9 @@
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "damp-tooth-c648"
+main = "src/worker.js"
+compatibility_date = "2022-07-12"
+
+[vars]
+SLACK_EMAIL = "slack@stairwaytowonderland.com"
+FORWARD_EMAIL = "stairwaytowonderland@gmail.com"
