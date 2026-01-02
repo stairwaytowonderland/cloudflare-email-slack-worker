@@ -77,6 +77,7 @@ The example uses [postal-mime](https://github.com/postalsys/postal-mime#readme) 
 - **`ATTACHMENT_BLOCK_COLOR_HEX`**: Override the hex color for the slack attachment blocks (default: `#36a64f`).
 - **`SHOW_RAW_BODY`**: Show raw HTML body instead of converted text (`true`/`false`, default: `false`)
 - **`FORWARD_EXCLUDE_SENDER`**: Prevent forwarding emails back to the original sender (`true`/`false`, default: `false`)
+- **`REPLY_TO_SENDER`**: Send an automated reply to the sender (`true`/`false`, default: `false`)
 
 ## Other Considerations
 
@@ -89,7 +90,7 @@ The example uses [postal-mime](https://github.com/postalsys/postal-mime#readme) 
 The official docs.
 
 - [**_Cloudflare_** Email Workers](https://developers.cloudflare.com/email-routing/email-workers/)
-	- [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
+  - [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
 - [**_Cloudflare_** Email DNS Settings](https://developers.cloudflare.com/email-routing/setup/email-routing-dns-records/)
 - [**_Slack_** Block Kit](https://docs.slack.dev/block-kit/)
 - [**_Slack_** Message Attachments (Legacy)](https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments)
@@ -112,5 +113,5 @@ I found these links after the fact, but could be useful for porting to other lan
 
 - [Cloudflare Workers Languages](https://developers.cloudflare.com/workers/languages/)
 - [Routing Emails Through a Cloudflare Worker](https://github.com/jldec/my-email-worker) (_Typescript_)<br>
-	(<small>Provides a good example on sending an automatic reply</small>)
-   - [Article link](https://jldec.me/blog/routing-emails-through-a-cloudflare-worker)
+  (<small>Provides a good example on sending an automatic reply</small>)
+  - [Article link](https://jldec.me/blog/routing-emails-through-a-cloudflare-worker)
