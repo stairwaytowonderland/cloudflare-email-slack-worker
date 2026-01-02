@@ -23,17 +23,21 @@ export default {
 	},
 };
 
-function filterEmails(addressList, workerEmail, additionalExcludes = []) {
+function filterEmails(message, env, workerEmail) {
+	const addressList = (env.FORWARD_EMAIL || '').split(',');
+	// Always worker email to prevent loops
+	const excludeList = [workerEmail]
+		// Exclude sender if configured
+		.concat(env.FORWARD_EXCLUDE_SENDER === true ? [message.from] : []);
+
 	return (
 		addressList
 			.map((addr) => addr.trim())
 			.filter((addr) => addr.length > 0)
 			// Remove duplicates
 			.filter((addr, index, self) => self.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === index)
-			// Ensure we don't forward to the Slack email address
-			.filter((addr) => addr.toLowerCase() !== workerEmail.toLowerCase())
 			// Exclude any additional addresses
-			.filter((addr) => !additionalExcludes.some((excl) => excl.toLowerCase() === addr.toLowerCase()))
+			.filter((addr) => !excludeList.some((excl) => excl.toLowerCase() === addr.toLowerCase()))
 	);
 }
 
@@ -74,17 +78,31 @@ async function main(message, env, ctx) {
 		attachmentEncoding: 'base64',
 	});
 
-	// Prepare list of emails to forward to
+	const recipientEmail = message.to.trim();
 	const workerEmail = env.WORKER_EMAIL.trim();
-	const forwardEmails = filterEmails(
-		(env.FORWARD_EMAIL || '').split(','),
-		workerEmail,
-		env.FORWARD_EXCLUDE_SENDER === true ? [message.from] : []
-	);
 
-	await forward(message, env, forwardEmails);
-	await process(message, env, workerEmail, parsedContent);
-	await reply(message, env, parsedContent);
+	// Prepare list of emails to forward to
+	const forwardEmails = filterEmails(message, env, workerEmail);
+
+	// Process based on recipient address
+	switch (recipientEmail.toLowerCase()) {
+		case workerEmail.toLowerCase():
+			if (env.DEBUG === true) {
+				console.debug('Processing incoming email', {
+					to: recipientEmail,
+					from: message.from,
+					timestamp: Date.now(),
+				});
+			}
+			await forward(message, env, forwardEmails);
+			await process(message, env, parsedContent);
+			await reply(message, env, parsedContent);
+			break;
+
+		default:
+			console.error('Unknown recipient address:', recipientEmail);
+			message.setReject('Unknown address');
+	}
 }
 
 function attachmentInfo(attachments) {
@@ -105,34 +123,29 @@ function attachmentInfo(attachments) {
 }
 
 async function reply(message, env, parsedContent) {
-	try {
-		if (env.REPLY_TO_SENDER === true) {
-			if (env.DEBUG === true) {
-				console.debug('Replying to sender:', {
-					to: message.from,
-					timestamp: Date.now(),
-				});
-			}
-
-			// creates reply message
-			const msg = createMimeMessage();
-			const subject = parsedContent.subject || '(No Subject)';
-			msg.setSender({ name: 'Thank you for your message', addr: message.to });
-			msg.setRecipient(message.from);
-			msg.setHeader('In-Reply-To', message.headers.get('Message-ID'));
-			msg.setSubject('Automated Reply: ' + subject);
-			msg.addMessage({
-				contentType: 'text/plain',
-				data: `This is an automated reply. Your email with the subject "${subject}" was received, and will be handled as soon as possible.\n\n`,
+	if (env.REPLY_TO_SENDER === true) {
+		if (env.DEBUG === true) {
+			console.debug('Replying to sender:', {
+				to: message.from,
+				timestamp: Date.now(),
 			});
-
-			const replyMessage = new EmailMessage(message.to, message.from, msg.asRaw());
-
-			await message.reply(replyMessage);
 		}
-	} catch (error) {
-		console.error('Error sending reply email:', error);
-		message.setReject('Problem sending reply');
+
+		// creates reply message
+		const msg = createMimeMessage();
+		const subject = parsedContent.subject || '(No Subject)';
+		msg.setSender({ name: 'Thank you for your message', addr: message.to });
+		msg.setRecipient(message.from);
+		msg.setHeader('In-Reply-To', message.headers.get('Message-ID'));
+		msg.setSubject('Automated Reply: ' + subject);
+		msg.addMessage({
+			contentType: 'text/plain',
+			data: `This is an automated reply. Your email with the subject "${subject}" was received, and will be handled as soon as possible.\n\n`,
+		});
+
+		const replyMessage = new EmailMessage(message.to, message.from, msg.asRaw());
+
+		await message.reply(replyMessage);
 	}
 }
 
@@ -172,10 +185,8 @@ async function forward(message, env, addrList) {
 	}
 }
 
-async function process(message, env, workerEmail, parsedContent) {
+async function process(message, env, parsedContent) {
 	const webhookUrl = env.SLACK_WEBHOOK_URL;
-
-	const recipientEmail = message.to.trim();
 	const subject = message.headers.get('subject');
 
 	// Extract body content
@@ -184,22 +195,11 @@ async function process(message, env, workerEmail, parsedContent) {
 	// Extract attachment info
 	const attachments = filterAttachments(parsedContent.attachments || []);
 
-	// Process based on recipient address
-	switch (recipientEmail.toLowerCase()) {
-		case workerEmail.toLowerCase():
-			if (env.DEBUG === true) {
-				console.debug('Processing incoming email', {
-					to: recipientEmail,
-					from: message.from,
-					timestamp: Date.now(),
-				});
-			}
-			await sendToSlack(env, webhookUrl, message.from, subject, body, attachments);
-			break;
-
-		default:
-			console.error('Unknown recipient address:', recipientEmail);
-			message.setReject('Unknown address');
+	try {
+		await sendToSlack(env, webhookUrl, message.from, subject, body, attachments);
+	} catch (error) {
+		console.error('Error sending to Slack:', error);
+		message.setReject('Problem sending to Slack');
 	}
 }
 
