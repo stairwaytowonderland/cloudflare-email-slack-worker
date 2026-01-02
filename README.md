@@ -60,6 +60,14 @@ The example uses the following dependencies (automatically installed during [set
    npx wrangler deploy
    ```
 
+### Local Development
+
+```bash
+npx wrangler dev
+```
+
+See the [official documentation](https://developers.cloudflare.com/email-routing/email-workers/local-development/) for more details.
+
 ## Environment Variables & Secrets
 
 > [!TIP]
@@ -101,15 +109,10 @@ The official docs.
 - [**_Cloudflare_** Email Workers](https://developers.cloudflare.com/email-routing/email-workers/)
   - [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
 - [**_Cloudflare_** Email DNS Settings](https://developers.cloudflare.com/email-routing/setup/email-routing-dns-records/)
-- [**_Cloudflare_** Node.js compatibility flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) (In `wrangler.toml`::`compatibility_flags`)
+- [**_Cloudflare_** Node.js compatibility flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)
+- [**_Cloudflare_** Local Development](https://developers.cloudflare.com/email-routing/email-workers/local-development/) (In `wrangler.toml`::`compatibility_flags`)
 - [**_Slack_** Block Kit](https://docs.slack.dev/block-kit/)
 - [**_Slack_** Message Attachments (Legacy)](https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments)
-
-### Local Development
-
-Documentation for developing and testing locally.
-
-- [**_Cloudflare_** Local Development](https://developers.cloudflare.com/email-routing/email-workers/local-development/)
 
 ### Other References
 
