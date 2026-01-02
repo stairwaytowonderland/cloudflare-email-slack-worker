@@ -1,9 +1,9 @@
 #!/bin/sh
 
 curl \
-	--request POST 'http://localhost:8787/cdn-cgi/handler/email' \
-	--url-query 'from=sender@example.com' \
-	--url-query 'to=recipient@example.com' \
+    --request POST 'http://localhost:8787/cdn-cgi/handler/email' \
+    --url-query 'from=sender@example.com' \
+    --url-query 'to=recipient@example.com' \
 	--header 'Content-Type: application/json' \
 	--data-raw 'Received: from smtp.example.com (127.0.0.1)
         by cloudflare-email.com (unknown) id 4fwwffRXOpyR
