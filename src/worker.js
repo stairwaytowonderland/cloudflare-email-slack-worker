@@ -106,23 +106,6 @@ async function main(message, env, ctx) {
 	}
 }
 
-function attachmentInfo(attachments) {
-	const hasAttachments = attachments && attachments.length > 0;
-	return hasAttachments
-		? [
-				{
-					type: 'context',
-					elements: [
-						{
-							type: 'mrkdwn',
-							text: `*_Attachments:_* ${attachments.length} file(s) received.`,
-						},
-					],
-				},
-			]
-		: [];
-}
-
 async function reply(message, env, parsedContent) {
 	if (env.REPLY_TO_SENDER === true) {
 		if (env.DEBUG === true) {
@@ -204,7 +187,24 @@ async function process(message, env, parsedContent) {
 	}
 }
 
-async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
+function attachmentInfo(attachments) {
+	const hasAttachments = attachments && attachments.length > 0;
+	return hasAttachments
+		? [
+				{
+					type: 'context',
+					elements: [
+						{
+							type: 'mrkdwn',
+							text: `*_Attachments:_* ${attachments.length} file(s) received.`,
+						},
+					],
+				},
+			]
+		: [];
+}
+
+function slackPayload(env, from, subject, body, attachments) {
 	const attachmentInfoBlocks = attachmentInfo(attachments);
 	const hasAttachments = attachmentInfoBlocks.length > 0;
 	const showAttachments = env.SHOW_ATTACHMENTS === true;
@@ -212,7 +212,7 @@ async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
 	const attachmentBlockColor = env.ATTACHMENT_BLOCK_COLOR_HEX;
 
 	// https://docs.slack.dev/block-kit/
-	const slackPayload = {
+	return {
 		blocks: [
 			{
 				type: 'header',
@@ -320,11 +320,15 @@ async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
 				}
 			: {}),
 	};
+}
+
+async function sendToSlack(env, webhookUrl, from, subject, body, attachments) {
+	const slackPayloadData = slackPayload(env, from, subject, body, attachments);
 
 	// Send to Slack
 	await fetch(webhookUrl, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(slackPayload),
+		body: JSON.stringify(slackPayloadData),
 	});
 }

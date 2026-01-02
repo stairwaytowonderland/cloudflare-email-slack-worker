@@ -19,16 +19,25 @@ As such, this guide just provides coding details for creating custom slack routi
 > [!NOTE]
 > For **Email Forwarding** (mentioned above) to work, the `to` address must match a **_verified_ [Destination address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)**.
 
+## Slack Apps
+
+Create and Manage slack apps using the slack **api** url: [api.slack.com/apps](https://api.slack.com/).
+
 ## Prerequisites
 
 _TODO_
 
 ## Dependencies
 
-The example uses [postal-mime](https://github.com/postalsys/postal-mime#readme) to parse attachments, and [html-to-text](https://github.com/html-to-text/node-html-to-text/tree/master/packages/html-to-text) to convert html to text.
+The example uses the following dependencies (automatically installed during [setup](#setup)):
 
-> [!NOTE]
-> The individual dependencies will be automatically installed during [setup](#setup).
+- [`postal-mime`](https://github.com/postalsys/postal-mime#readme) to parse attachments
+- [`html-to-text`](https://github.com/html-to-text/node-html-to-text/tree/master/packages/html-to-text) to convert html to text
+- [`mime-text`](https://github.com/muratgozel/MIMEText) to generate a reply
+
+> [!IMPORTANT]
+> Enabling built-in Node.js APIs (_i.e. `mime-text`_) requires the [`nodejs_compat` compatibility flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) in `wrangler.toml`.
+> (_Also ensure that your Worker's compatibility date is 2024-09-23 or later._)
 
 ## Setup
 
@@ -92,6 +101,7 @@ The official docs.
 - [**_Cloudflare_** Email Workers](https://developers.cloudflare.com/email-routing/email-workers/)
   - [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
 - [**_Cloudflare_** Email DNS Settings](https://developers.cloudflare.com/email-routing/setup/email-routing-dns-records/)
+- [**_Cloudflare_** Node.js compatibility flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) (In `wrangler.toml`::`compatibility_flags`)
 - [**_Slack_** Block Kit](https://docs.slack.dev/block-kit/)
 - [**_Slack_** Message Attachments (Legacy)](https://docs.slack.dev/messaging/formatting-message-text#when-to-use-attachments)
 
@@ -112,6 +122,4 @@ Other blogs and reference materials I used a a guide.
 I found these links after the fact, but could be useful for porting to other languages.
 
 - [Cloudflare Workers Languages](https://developers.cloudflare.com/workers/languages/)
-- [Routing Emails Through a Cloudflare Worker](https://github.com/jldec/my-email-worker) (_Typescript_)<br>
-  (<small>Provides a good example on sending an automatic reply</small>)
-  - [Article link](https://jldec.me/blog/routing-emails-through-a-cloudflare-worker)
+- [Routing Emails Through a Cloudflare Worker](https://github.com/jldec/my-email-worker) (_Typescript_)
