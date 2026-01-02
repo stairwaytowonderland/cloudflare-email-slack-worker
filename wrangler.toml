@@ -3,16 +3,19 @@
 name = "damp-tooth-c648"
 main = "src/worker.js"
 compatibility_date = "2025-12-30"
+compatibility_flags = [ "nodejs_compat" ]
 
 workers_dev = true
 preview_urls = false
 
 [vars]
-# DEBUG = true
+DEBUG = true
+# SHOW_RAW_BODY = true
+# SHOW_ENCODED_ATTACHMENTS = true
+# REPLY_TO_SENDER = true
 FORWARD_EXCLUDE_SENDER = true
 SHOW_ATTACHMENTS = true
 ATTACHMENT_BLOCK_COLOR_HEX = "#36a64f"
-# SHOW_RAW_BODY = true
 
 # Store secrets in .env file and set them using the command below:
 # npx wrangler secret put <SECRET_KEY>
@@ -23,3 +26,7 @@ enabled = true
 head_sampling_rate = 1
 invocation_logs = true
 persist = true
+
+# https://developers.cloudflare.com/email-routing/email-workers/local-development/
+[[send_email]]
+name = "EMAIL"

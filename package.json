@@ -8,10 +8,12 @@
 		"start": "wrangler dev"
 	},
 	"devDependencies": {
+		"prettier": "^3.7.4",
 		"wrangler": "^4.54.0"
 	},
 	"dependencies": {
 		"html-to-text": "^9.0.5",
+		"mimetext": "^3.0.27",
 		"postal-mime": "^2.7.1"
 	}
 }
