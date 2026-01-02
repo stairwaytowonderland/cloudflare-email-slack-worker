@@ -74,15 +74,8 @@ async function debug(message, env, ctx) {
 }
 
 async function main(message, env, ctx) {
-	const parsedContent = await PostalMime.parse(message.raw, {
-		attachmentEncoding: 'base64',
-	});
-
 	const recipientEmail = message.to.trim();
 	const workerEmail = env.WORKER_EMAIL.trim();
-
-	// Prepare list of emails to forward to
-	const forwardEmails = filterEmails(message, env, workerEmail);
 
 	// Process based on recipient address
 	switch (recipientEmail.toLowerCase()) {
@@ -94,6 +87,14 @@ async function main(message, env, ctx) {
 					timestamp: Date.now(),
 				});
 			}
+			// Prepare list of emails to forward to
+			const forwardEmails = filterEmails(message, env, workerEmail);
+
+			// Parses incoming message
+			const parsedContent = await PostalMime.parse(message.raw, {
+				attachmentEncoding: 'base64',
+			});
+
 			await forward(message, env, forwardEmails);
 			await process(message, env, parsedContent);
 			await reply(message, env, parsedContent);

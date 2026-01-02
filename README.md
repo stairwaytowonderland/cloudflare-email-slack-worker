@@ -4,7 +4,7 @@ A Cloudflare Email Worker that receives incoming emails, parses them, and sends 
 
 ## In this Guide
 
-Cloudflare provides detailed [official documentation](https://developers.cloudflare.com/email-routing/email-workers/) on configuration a basic Email Worker.
+Cloudflare provides detailed [official documentation](https://developers.cloudflare.com/email-routing/email-workers/) on configuring a basic Email Worker.
 
 As such, this guide just provides coding details for creating custom slack routing email worker.
 
