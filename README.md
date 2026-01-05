@@ -100,6 +100,114 @@ See the [official documentation](https://developers.cloudflare.com/email-routing
 
 - [Nameserver configuration](https://developers.cloudflare.com/dns/zone-setups/full-setup/setup/)
 
+## IaC
+
+TODO
+
+### Terraform POC
+
+> [!CAUTION]
+> The following (_Terraform_) is sample output from google AI, and is **untested!**
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID="your-account-id"
+export CLOUDFLARE_API_TOKEN="your-api-token"
+```
+
+```hcl
+# Configure the Cloudflare provider
+terraform {
+  required_providers {
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+      version = "~> 4.0" # Use a compatible version
+    }
+  }
+}
+
+provider "cloudflare" {
+  api_token  = var.cloudflare_api_token
+  account_id = var.cloudflare_account_id
+}
+
+# Define variables
+variable "cloudflare_account_id" {
+  type = string
+}
+
+variable "cloudflare_api_token" {
+  type = string
+}
+
+variable "zone_id" {
+  type = string
+  # Example: default = "your-zone-id"
+}
+
+variable "email_worker_script_path" {
+  type    = string
+  default = "./email_worker.js"
+}
+
+# 1. Define the Cloudflare Worker script
+resource "cloudflare_workers_script" "email_worker" {
+  account_id = var.cloudflare_account_id
+  name       = "email_worker_script"
+  content    = file(var.email_worker_script_path)
+  # Add bindings here if needed (e.g., KV, R2, or secrets)
+  # binding {
+  #   name = "MY_KV"
+  #   type = "kv_namespace"
+  #   namespace_id = cloudflare_kv_namespace.example.id
+  # }
+}
+
+# 2. Enable Email Routing for the zone (if not already enabled)
+resource "cloudflare_email_routing_settings" "main_zone_settings" {
+  zone_id = var.zone_id
+  enabled = true
+}
+
+# 3. Create an Email Routing Rule to route emails to the Worker
+resource "cloudflare_email_routing_rule" "worker_route" {
+  zone_id    = var.zone_id
+  name       = "route_to_worker"
+  priority   = 1
+  # Route all emails to the worker (e.g., for "catch-all@your-domain.com")
+  matchers {
+    type  = "all"
+  }
+
+  action {
+    type  = "worker"
+    value = [cloudflare_workers_script.email_worker.id]
+  }
+}
+```
+
+```javascript
+// A basic Cloudflare Email Worker script
+export default {
+	async email(message, env, ctx) {
+		// Log the incoming email details
+		console.log(`Received email from ${message.from} to ${message.to}: ${message.subject}`);
+
+		// You can process the email content, forward it, store it in KV/R2, etc.
+		// Example: Forwarding the email to a specific address (ensure destination is verified in CF dashboard if needed)
+		// await message.forward("destination@example.net");
+
+		// Example: Storing a log in a KV namespace binding named "EMAIL_LOGS"
+		// await env.EMAIL_LOGS.put(message.id, message.subject);
+	},
+};
+```
+
+**Official Docs**
+
+- [Terraform Provider](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs)
+  - [Workers Script](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/workers_script) (_legacy_)
+- [Cloudflare Example](https://developers.cloudflare.com/workers/platform/infrastructure-as-code/) (_beta_)
+
 ## References
 
 ### Official Documentation
