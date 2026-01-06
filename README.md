@@ -105,16 +105,15 @@ See the [official documentation](https://developers.cloudflare.com/email-routing
 You must create a [Cloudflare API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) with the following permissions:
 
 ```
-|-- <account> -
-        Workers Agents Configuration:Edit, Containers:Edit, Workers Observability:Edit,
-        Secrets Store:Edit, Browser Rendering:Edit, AI Gateway:Run,
-        Workers Builds Configuration:Edit, Workers Pipelines:Edit, AI Gateway:Edit,
-        AI Gateway:Read, Workers AI:Edit, Queues:Edit, Vectorize:Edit, Hyperdrive:Edit,
-        Cloudchamber:Edit, D1:Edit, Email Routing Addresses:Edit, Cloudflare Pages:Edit,
-        Workers R2 Storage:Edit, Workers Tail:Read, Workers KV Storage:Edit,
-        Workers Scripts:Edit, Account Settings:Read
+|-- <account> - Workers Agents Configuration:Edit, Containers:Edit, Workers Observability:Edit,
+        |    Secrets Store:Edit, Browser Rendering:Edit, AI Gateway:Run,
+        |    Workers Builds Configuration:Edit, Workers Pipelines:Edit, AI Gateway:Edit,
+        |    AI Gateway:Read, Workers AI:Edit, Queues:Edit, Vectorize:Edit, Hyperdrive:Edit,
+        |    Cloudchamber:Edit, D1:Edit, Email Routing Addresses:Edit, Cloudflare Pages:Edit,
+        |    Workers R2 Storage:Edit, Workers Tail:Read, Workers KV Storage:Edit,
+        |    Workers Scripts:Edit, Account Settings:Read
         └-- All zones - Email Routing Rules:Edit, Zone Settings:Edit, Zone:Read,
-                        Workers Routes:Edit, SSL and Certificates:Edit
+                    Workers Routes:Edit, SSL and Certificates:Edit
 
 ```
 
