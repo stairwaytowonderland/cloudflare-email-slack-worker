@@ -140,12 +140,12 @@ provider "cloudflare" {
   api_token  = var.cloudflare_api_token
 }
 
+# Define variables
 variable "catch_all" {
   type    = bool
   default = false
 }
 
-# Define variables
 variable "cloudflare_account_id" {
   type = string
 }
@@ -173,6 +173,7 @@ locals {
   recipient_email  = "${var.recipient_email_prefix}@${local.zone_name}"
 }
 
+# Retrieve zone details
 data "cloudflare_zones" "this" {
   account = {
     id = var.cloudflare_account_id
