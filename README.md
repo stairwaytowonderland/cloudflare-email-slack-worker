@@ -43,22 +43,22 @@ The example uses the following dependencies (automatically installed during [set
 
 1. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. Configure secrets using Wrangler:
 
-   ```bash
-   npx wrangler secret put SLACK_WEBHOOK_URL
-   npx wrangler secret put WORKER_EMAIL
-   npx wrangler secret put FORWARD_EMAIL
-   ```
+    ```bash
+    npx wrangler secret put SLACK_WEBHOOK_URL
+    npx wrangler secret put WORKER_EMAIL
+    npx wrangler secret put FORWARD_EMAIL
+    ```
 
 3. Deploy to Cloudflare:
-   ```bash
-   npx wrangler deploy
-   ```
+    ```bash
+    npx wrangler deploy
+    ```
 
 ### Local Development
 
@@ -102,16 +102,28 @@ See the [official documentation](https://developers.cloudflare.com/email-routing
 
 ## IaC
 
-TODO
+You must create a [Cloudflare API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) with the following permissions:
+
+```
+|-- <account> -
+        Workers Agents Configuration:Edit, Containers:Edit, Workers Observability:Edit,
+        Secrets Store:Edit, Browser Rendering:Edit, AI Gateway:Run,
+        Workers Builds Configuration:Edit, Workers Pipelines:Edit, AI Gateway:Edit,
+        AI Gateway:Read, Workers AI:Edit, Queues:Edit, Vectorize:Edit, Hyperdrive:Edit,
+        Cloudchamber:Edit, D1:Edit, Email Routing Addresses:Edit, Cloudflare Pages:Edit,
+        Workers R2 Storage:Edit, Workers Tail:Read, Workers KV Storage:Edit,
+        Workers Scripts:Edit, Account Settings:Read
+        └-- All zones - Email Routing Rules:Edit, Zone Settings:Edit, Zone:Read,
+                        Workers Routes:Edit, SSL and Certificates:Edit
+
+```
 
 ### Terraform POC
 
-> [!CAUTION]
-> The following (_Terraform_) is sample output from google AI, and is **untested!**
-
 ```bash
-export CLOUDFLARE_ACCOUNT_ID="your-account-id"
-export CLOUDFLARE_API_TOKEN="your-api-token"
+export TF_VAR_cloudflare_account_id="your-account-id"
+export TF_VAR_cloudflare_api_token="your-api-token"
+export TF_VAR_cloudflare_domain="example.com"
 ```
 
 ```hcl
@@ -120,14 +132,18 @@ terraform {
   required_providers {
     cloudflare = {
       source = "cloudflare/cloudflare"
-      version = "~> 4.0" # Use a compatible version
+      version = "~> 5.0" # Use a compatible version
     }
   }
 }
 
 provider "cloudflare" {
   api_token  = var.cloudflare_api_token
-  account_id = var.cloudflare_account_id
+}
+
+variable "catch_all" {
+  type    = bool
+  default = false
 }
 
 # Define variables
@@ -139,58 +155,147 @@ variable "cloudflare_api_token" {
   type = string
 }
 
-variable "zone_id" {
+variable "cloudflare_domain" {
   type = string
-  # Example: default = "your-zone-id"
 }
 
 variable "email_worker_script_path" {
   type    = string
-  default = "./email_worker.js"
+  default = "./src/email_worker.js"
 }
 
-# 1. Define the Cloudflare Worker script
-resource "cloudflare_workers_script" "email_worker" {
+variable "recipient_email_prefix" {
+  type = string
+}
+
+locals {
+  zone_id          = one(data.cloudflare_zones.this.result).id
+  zone_name        = one(data.cloudflare_zones.this.result).name
+  recipient_email  = "${var.recipient_email_prefix}@${local.zone_name}"
+}
+
+data "cloudflare_zones" "this" {
+  account = {
+    id = var.cloudflare_account_id
+  }
+  name   = var.domain_name
+  status = "active"
+}
+
+# 1. Define the Cloudflare Worker
+resource "cloudflare_worker" "email_worker" {
   account_id = var.cloudflare_account_id
   name       = "email_worker_script"
-  content    = file(var.email_worker_script_path)
-  # Add bindings here if needed (e.g., KV, R2, or secrets)
-  # binding {
-  #   name = "MY_KV"
-  #   type = "kv_namespace"
-  #   namespace_id = cloudflare_kv_namespace.example.id
+
+  # Not required, but good practice
+  observability = {
+    enabled            = true
+    head_sampling_rate = 1
+    logs = {
+      enabled            = true
+      head_sampling_rate = 1
+      invocation_logs    = true
+    }
+  }
+}
+
+# 2. Define the Cloudflare Worker Version
+resource "cloudflare_worker_version" "email_worker" {
+  account_id          = var.cloudflare_account_id
+  worker_id           = cloudflare_worker.email_worker.id
+  # https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
+  compatibility_date = "2024-09-23"
+  compatibility_flags = [ "nodejs_compat" ]
+  main_module         = "worker.js"
+  modules = [
+    {
+      name         = "worker.js"
+      content_type = "application/javascript+module"
+      content_file = "${path.module}/${var.email_worker_script_path}"
+    }
+  ]
+
+  # Optionally ignore changes if compatibility_date changes
+  # lifecycle {
+  #   ignore_changes = [compatibility_date]
   # }
 }
 
-# 2. Enable Email Routing for the zone (if not already enabled)
-resource "cloudflare_email_routing_settings" "main_zone_settings" {
-  zone_id = var.zone_id
-  enabled = true
+# 3. Define the Cloudflare Worker Deployment
+resource "cloudflare_workers_deployment" "email_worker" {
+  account_id  = var.cloudflare_account_id
+  script_name = cloudflare_worker.email_worker.name
+  strategy    = "percentage"
+  versions = [{
+    percentage = 100
+    version_id = cloudflare_worker_version.email_worker.id
+  }]
 }
 
-# 3. Create an Email Routing Rule to route emails to the Worker
-resource "cloudflare_email_routing_rule" "worker_route" {
-  zone_id    = var.zone_id
-  name       = "route_to_worker"
-  priority   = 1
-  # Route all emails to the worker (e.g., for "catch-all@your-domain.com")
-  matchers {
-    type  = "all"
-  }
+# 4. Enable Email Routing for the zone
+resource "cloudflare_email_routing_settings" "zone" {
+  zone_id = local.zone_id
+}
 
-  action {
+# 5a. Conditionally create an Email Routing Rule to route emails to the Worker
+resource "cloudflare_email_routing_rule" "worker" {
+  count = var.catch_all ? 1 : 0
+
+  zone_id  = local.zone_id
+  name     = format("Worker %s", cloudflare_workers_deployment.email_worker.script_name)
+  priority = 0
+  enabled  = true
+
+  matchers = [{
+    type  = "literal"
+    field = "to"
+    value = local.recipient_email
+  }]
+
+  actions = [{
+    type  = each.value.action
+    value = [cloudflare_worker.email_worker.name]
+  }]
+}
+
+# 5b. Conditionally create an Email Routing Catch-All Rule to route emails to the Worker
+resource "cloudflare_email_routing_catch_all" "this" {
+  count = var.catch_all ? 1 : 0
+
+  zone_id  = local.zone_id
+  name     = format("Worker %s", cloudflare_workers_deployment.email_worker.script_name)
+  enabled  = local.catch_all_enabled
+
+  matchers = [{
+    type = "all"
+  }]
+
+  actions = [{
     type  = "worker"
-    value = [cloudflare_workers_script.email_worker.id]
-  }
+    value = [cloudflare_worker.email_worker.name]
+  }]
 }
 ```
 
 ```javascript
-// A basic Cloudflare Email Worker script
+// A basic Cloudflare Email Worker script (e.g. place this in src/email_worker.js)
 export default {
+	async fetch(request, env, ctx) {
+		// Log the request URL to the dashboard (optional)
+		console.log(`Handling request for: ${request.url}`);
+
+		// Access a binding if you have one configured (e.g., a KV namespace named 'MY_KV_STORE')
+		// const value = await env.MY_KV_STORE.get("someKey");
+
+		return new Response('Cloudflare Worker (ES Module) is running.', {
+			headers: { 'Content-Type': 'text/plain' },
+			status: 200,
+		});
+	},
+
 	async email(message, env, ctx) {
 		// Log the incoming email details
-		console.log(`Received email from ${message.from} to ${message.to}: ${message.subject}`);
+		console.log(`Received email from ${message.from} to ${message.to}: ${message.headers.get('subject')}`);
 
 		// You can process the email content, forward it, store it in KV/R2, etc.
 		// Example: Forwarding the email to a specific address (ensure destination is verified in CF dashboard if needed)
@@ -205,7 +310,7 @@ export default {
 **Official Docs**
 
 - [Terraform Provider](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs)
-  - [Workers Script](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/workers_script) (_legacy_)
+    - [Workers Script](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/workers_script)
 - [Cloudflare Example](https://developers.cloudflare.com/workers/platform/infrastructure-as-code/) (_beta_)
 
 ## References
@@ -215,7 +320,7 @@ export default {
 The official docs.
 
 - [**_Cloudflare_** Email Workers](https://developers.cloudflare.com/email-routing/email-workers/)
-  - [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
+    - [Verify a Destination Address](https://developers.cloudflare.com/email-routing/setup/email-routing-addresses/#destination-addresses)
 - [**_Cloudflare_** Email DNS Settings](https://developers.cloudflare.com/email-routing/setup/email-routing-dns-records/)
 - [**_Cloudflare_** Node.js compatibility flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)
 - [**_Cloudflare_** Local Development](https://developers.cloudflare.com/email-routing/email-workers/local-development/) (In `wrangler.toml`::`compatibility_flags`)

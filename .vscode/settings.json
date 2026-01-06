@@ -12,7 +12,8 @@
 	"files.insertFinalNewline": true,
 	"editor.detectIndentation": false,
 	"editor.tabSize": 4,
-	"[markdown]": {
-		"editor.tabSize": 2
+	"[yaml]": {
+		"editor.defaultFormatter": "redhat.vscode-yaml"
+		// "editor.tabSize": 2, // 2 spaces is standard for YAML and is handled by vscode-yaml extension
 	}
 }
