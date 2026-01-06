@@ -264,7 +264,7 @@ resource "cloudflare_email_routing_catch_all" "this" {
 
   zone_id  = local.zone_id
   name     = format("Worker %s", cloudflare_workers_deployment.email_worker.script_name)
-  enabled  = local.catch_all_enabled
+  enabled  = var.catch_all
 
   matchers = [{
     type = "all"
