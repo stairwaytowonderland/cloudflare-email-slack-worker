@@ -119,6 +119,8 @@ You must create a [Cloudflare API token](https://developers.cloudflare.com/funda
 
 ### Terraform POC
 
+**See the [demo](https://github.com/stairwaytowonderland/cloudflare-email-worker-iac) repo for a complete example.**
+
 ```bash
 export TF_VAR_cloudflare_account_id="your-account-id"
 export TF_VAR_cloudflare_api_token="your-api-token"
