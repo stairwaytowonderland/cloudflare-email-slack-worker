@@ -2,6 +2,7 @@
 	"editor.formatOnType": true,
 	"editor.formatOnSave": true,
 	"editor.formatOnPaste": false,
+	// "editor.formatOnSaveMode": "modifications",
 	// https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"prettier.useEditorConfig": true,
@@ -12,8 +13,26 @@
 	"files.insertFinalNewline": true,
 	"editor.detectIndentation": false,
 	"editor.tabSize": 4,
+	/*
+		YAML settings
+	*/
 	"[yaml]": {
-		"editor.defaultFormatter": "redhat.vscode-yaml"
-		// "editor.tabSize": 2, // 2 spaces is standard for YAML and is handled by vscode-yaml extension
-	}
+		"editor.defaultFormatter": "redhat.vscode-yaml",
+		"editor.formatOnSave": true
+	},
+
+	/*
+		Markdown settings
+	*/
+	"[markdown]": {
+		"editor.defaultFormatter": "yzhang.markdown-all-in-one",
+		"editor.formatOnSave": true,
+		"editor.formatOnPaste": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.markdownlint": "explicit"
+		}
+	},
+	// https://github.com/yzhang-gh/vscode-markdown?tab=readme-ov-file#supported-settings
+	"markdown.extension.orderedList.marker": "one",
+	"markdown.extension.toc.unorderedList.marker": "-"
 }

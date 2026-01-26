@@ -74,7 +74,13 @@ async function debug(message, env, ctx) {
 }
 
 async function main(message, env, ctx) {
-	const recipientEmail = message.to.trim();
+	// Trim subaddresses and whitespace from recipient,
+	// preserving everything before '+' and after '@'.
+	const recipientEmail = message.to
+		.trim()
+		.split(',')
+		.map((addr) => addr.trim().split('+')[0])
+		.join(',');
 	const workerEmail = env.WORKER_EMAIL.trim();
 
 	// Process based on recipient address
