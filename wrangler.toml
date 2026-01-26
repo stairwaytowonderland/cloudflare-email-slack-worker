@@ -2,7 +2,7 @@
 
 name = "damp-tooth-c648"
 main = "src/worker.js"
-compatibility_date = "2025-12-30"
+compatibility_date = "2025-12-10"
 compatibility_flags = [ "nodejs_compat" ]
 
 workers_dev = true

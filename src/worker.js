@@ -73,43 +73,50 @@ async function debug(message, env, ctx) {
 	return await reply(message, env, email);
 }
 
+async function handle(message, env, recipientEmail, workerEmail) {
+	if (env.DEBUG === true) {
+		console.debug('Processing incoming email', {
+			to: recipientEmail,
+			from: message.from,
+			timestamp: Date.now(),
+		});
+	}
+	// Prepare list of emails to forward to
+	const forwardEmails = filterEmails(message, env, workerEmail);
+
+	// Parses incoming message
+	const parsedContent = await PostalMime.parse(message.raw, {
+		attachmentEncoding: 'base64',
+	});
+
+	await forward(message, env, forwardEmails);
+	await process(message, env, parsedContent);
+	await reply(message, env, parsedContent);
+}
+
 async function main(message, env, ctx) {
+	const recipientEmail = message.to.trim();
 	// Trim subaddresses and whitespace from recipient,
 	// preserving everything before '+' and after '@'.
-	const recipientEmail = message.to
-		.trim()
-		.split(',')
-		.map((addr) => addr.trim().split('+')[0])
-		.join(',');
+	// const recipientEmail = message.to
+	// 	.trim()
+	// 	.split(',')
+	// 	.map((addr) => addr.trim().split('+')[0])
+	// 	.join(',');
 	const workerEmail = env.WORKER_EMAIL.trim();
 
 	// Process based on recipient address
-	switch (recipientEmail.toLowerCase()) {
-		case workerEmail.toLowerCase():
-			if (env.DEBUG === true) {
-				console.debug('Processing incoming email', {
-					to: recipientEmail,
-					from: message.from,
-					timestamp: Date.now(),
-				});
-			}
-			// Prepare list of emails to forward to
-			const forwardEmails = filterEmails(message, env, workerEmail);
+	// switch (recipientEmail.toLowerCase()) {
+	// 	case workerEmail.toLowerCase():
+	// 		await handle(message, env, recipientEmail, workerEmail);
+	// 		break;
 
-			// Parses incoming message
-			const parsedContent = await PostalMime.parse(message.raw, {
-				attachmentEncoding: 'base64',
-			});
+	// 	default:
+	// 		console.error('Unknown recipient address:', recipientEmail);
+	// 		message.setReject('Unknown address');
+	// }
 
-			await forward(message, env, forwardEmails);
-			await process(message, env, parsedContent);
-			await reply(message, env, parsedContent);
-			break;
-
-		default:
-			console.error('Unknown recipient address:', recipientEmail);
-			message.setReject('Unknown address');
-	}
+	await handle(message, env, recipientEmail, workerEmail);
 }
 
 async function reply(message, env, parsedContent) {
